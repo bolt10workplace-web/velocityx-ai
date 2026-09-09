@@ -12,7 +12,7 @@ const appUrl = (process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || `http:
 const defaultImageUrl = 'https://i.imgur.com/hdo1Zvj.png';
 const configuredImageUrl = process.env.EMAIL_IMAGE_URL || '';
 const imageUrl = configuredImageUrl && !configuredImageUrl.includes('b8aqlNz') ? configuredImageUrl : defaultImageUrl;
-let mailFrom = process.env.MAIL_FROM || 'Veloxicity <no-reply@veloxicity.com>';
+let mailFrom = process.env.MAIL_FROM || mailUser || 'Veloxicity <no-reply@veloxicity.com>';
 mailFrom = mailFrom.replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^"(.+)"$/, '$1');
 
 const useNamedMailService = Boolean(mailService && !mailHost);
