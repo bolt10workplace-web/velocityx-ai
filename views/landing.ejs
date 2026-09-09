@@ -394,6 +394,25 @@
 		min-width: 190px;
 	}
 
+	.vx-education-actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	@media (max-width: 576px) {
+		.vx-education-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.vx-education-actions .vx-btn {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
 	@media (max-width: 576px) {
 		.vx-cta-actions {
 			flex-direction: column;
@@ -1164,9 +1183,9 @@
 						</div>
 					</div>
 
-					<div style="margin-top: 32px;">
+					<div class="vx-education-actions" style="margin-top: 32px;">
 						<a href="/education" class="vx-btn">Start Learning</a>
-						<a href="#" class="vx-btn vx-btn-outline" style="margin-left: 12px;">View Resources</a>
+						<a href="#" class="vx-btn vx-btn-outline">View Resources</a>
 					</div>
 				</div>
 			</div>
