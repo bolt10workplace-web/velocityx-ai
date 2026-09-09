@@ -3,16 +3,22 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-const mailService = process.env.MAIL_SERVICE || process.env.SMTP_SERVICE;
-const mailHost = process.env.MAIL_HOST || process.env.SMTP_HOST || (mailService ? undefined : 'smtp.gmail.com');
-const mailPort = Number(process.env.MAIL_PORT || process.env.SMTP_PORT || 465);
-const mailUser = process.env.MAIL_USER || process.env.SMTP_USER;
-const mailPass = process.env.MAIL_PASS || process.env.SMTP_PASS;
-const appUrl = (process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, '');
+const getEnv = (...names) => {
+  const value = names.map((name) => process.env[name]).find((item) => item !== undefined && item !== '');
+  return value === undefined ? '' : String(value).trim().replace(/^(['"])(.*)\1$/, '$2');
+};
+const mailService = getEnv('MAIL_SERVICE', 'SMTP_SERVICE');
+const mailHost = getEnv('MAIL_HOST', 'SMTP_HOST') || (mailService ? undefined : 'smtp.gmail.com');
+const configuredPort = Number.parseInt(getEnv('MAIL_PORT', 'SMTP_PORT') || '587', 10);
+const mailPort = Number.isInteger(configuredPort) && configuredPort > 0 && configuredPort < 65536 ? configuredPort : 587;
+const mailUser = getEnv('MAIL_USER', 'SMTP_USER');
+const rawMailPass = getEnv('MAIL_PASS', 'SMTP_PASS');
+const mailPass = /gmail/i.test(`${mailService} ${mailHost}`) ? rawMailPass.replace(/\s+/g, '') : rawMailPass;
+const appUrl = (getEnv('APP_URL', 'RENDER_EXTERNAL_URL') || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, '');
 const defaultImageUrl = 'https://i.imgur.com/hdo1Zvj.png';
 const configuredImageUrl = process.env.EMAIL_IMAGE_URL || '';
 const imageUrl = configuredImageUrl && !configuredImageUrl.includes('b8aqlNz') ? configuredImageUrl : defaultImageUrl;
-let mailFrom = process.env.MAIL_FROM || mailUser || 'Veloxicity <no-reply@veloxicity.com>';
+let mailFrom = getEnv('MAIL_FROM') || mailUser || 'Veloxicity <no-reply@veloxicity.com>';
 mailFrom = mailFrom.replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^"(.+)"$/, '$1');
 
 const useNamedMailService = Boolean(mailService && !mailHost);
@@ -22,6 +28,7 @@ const transporterOptions = useNamedMailService
 
 const transporter = nodemailer.createTransport(transporterOptions);
 const mailConfigured = Boolean(mailUser && mailPass);
+const mailUserLabel = mailUser ? `${mailUser.slice(0, 2)}***${mailUser.slice(-Math.min(12, mailUser.length - 2))}` : 'missing';
 const dataDir = path.join(__dirname, 'data');
 const failedEmailsPath = path.join(dataDir, 'failed_emails.json');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -52,6 +59,14 @@ const enqueueFailedEmail = (to, subject, html, error) => {
 };
 
 if (mailConfigured) {
+  console.info('Mailer configuration:', {
+    mode: useNamedMailService ? 'service' : 'smtp',
+    service: useNamedMailService ? mailService : undefined,
+    host: useNamedMailService ? undefined : mailHost,
+    port: useNamedMailService ? undefined : mailPort,
+    user: mailUserLabel,
+    from: mailFrom
+  });
   console.info('Mailer image configured:', imageUrl);
   transporter.verify()
     .then(() => console.info('Mailer: transporter verified and ready'))
