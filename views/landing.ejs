@@ -1548,64 +1548,22 @@
 	<section class="vx-section">
 		<div class="container">
 			<div class="text-center">
-				<div class="vx-badge">SUCCESS STORIES</div>
-				<h2 class="vx-title">Client Testimonials</h2>
-				<p class="vx-subtitle">Hear from satisfied clients who trust velocityx-ai for their trading journey</p>
+				<div class="vx-badge">PLATFORM INFORMATION</div>
+				<h2 class="vx-title">Tools for Reviewing Market Activity</h2>
+				<p class="vx-subtitle">Explore platform features and consider the risks before making any trading decision</p>
 			</div>
 
 			<div class="vx-testimonials">
 				<div class="vx-testimonial-card">
-					<div class="vx-rating">
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-					</div>
-					<p class="vx-testimonial-text">I've been trading with velocityx-ai for over a year now and the platform is exceptional. The execution speed is incredible and the spreads are some of the best I've seen. The support team is always helpful and responsive.</p>
-					<div class="vx-testimonial-author">
-						<img src="https://i.imgur.com/9NLgNNE.jpeg" alt="Michael Chen" class="vx-author-img">
-						<div>
-							<div class="vx-author-name">Michael Chen</div>
-							<div class="vx-author-title">Professional Trader</div>
-						</div>
-					</div>
+					<p class="vx-testimonial-text">Review available market information, trading conditions, and applicable fees before using any platform feature.</p>
 				</div>
 
 				<div class="vx-testimonial-card">
-					<div class="vx-rating">
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-					</div>
-					<p class="vx-testimonial-text">As a beginner, I was nervous about starting to trade. velocityx-ai made the process so easy with their educational resources and demo account. The platform is intuitive and the customer support helped me every step of the way.</p>
-					<div class="vx-testimonial-author">
-						<img src="https://i.imgur.com/W0ZokR6.jpeg" alt="Sarah Johnson" class="vx-author-img">
-						<div>
-							<div class="vx-author-name">Sarah Johnson</div>
-							<div class="vx-author-title">Retail Trader</div>
-						</div>
-					</div>
+					<p class="vx-testimonial-text">Trading involves substantial risk. Past performance, projections, and market commentary do not guarantee future results.</p>
 				</div>
 
 				<div class="vx-testimonial-card">
-					<div class="vx-rating">
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-						<span class="vx-star">★</span>
-					</div>
 					<p class="vx-testimonial-text">Copy-trading tools can help users compare strategies and learn from market activity. Results vary and losses are possible.</p>
-					<div class="vx-testimonial-author">
-						<img src="https://i.imgur.com/7GdyRmh.jpeg" alt="David Martinez" class="vx-author-img">
-						<div>
-							<div class="vx-author-name">David Martinez</div>
-							<div class="vx-author-title">Copy Trader</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -2097,3 +2055,32 @@
 		const miniCanvas = document.getElementById('miniChart');
 		if (miniCanvas) {
 			const ctx = miniCanvas.getContext('2d');
+
+			ctx.strokeStyle = '#1a2332';
+			ctx.lineWidth = 1;
+			for (let i = 0; i < 6; i++) {
+				const y = (miniCanvas.height / 6) * i;
+				ctx.beginPath();
+				ctx.moveTo(0, y);
+				ctx.lineTo(miniCanvas.width, y);
+				ctx.stroke();
+			}
+
+			ctx.beginPath();
+			ctx.strokeStyle = '#3b82f6';
+			ctx.lineWidth = 2;
+			for (let i = 0; i < miniCanvas.width; i += 10) {
+				const x = i;
+				const y = miniCanvas.height / 2 + Math.sin(i / 30) * 50 + (Math.random() - 0.5) * 20;
+				if (i === 0) {
+					ctx.moveTo(x, y);
+				} else {
+					ctx.lineTo(x, y);
+				}
+			}
+			ctx.stroke();
+		}
+	}
+	</script>
+</body>
+</html>
