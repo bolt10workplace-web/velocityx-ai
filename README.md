@@ -40,9 +40,7 @@ Access the admin panel at:
 http://localhost:3000/admin/login
 ```
 
-Use the following credentials:
-- Email: admin@example.com
-- Password: Admin123
+Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` as private environment variables before using the admin panel. Never document or commit real credentials.
 
 ## Project Structure
 
