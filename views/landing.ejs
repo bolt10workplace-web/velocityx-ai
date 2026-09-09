@@ -381,6 +381,35 @@
 		color: #3b82f6;
 	}
 
+	.vx-cta-actions {
+		display: flex;
+		justify-content: center;
+		align-items: stretch;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.vx-cta-actions .vx-btn {
+		justify-content: center;
+		min-width: 190px;
+	}
+
+	@media (max-width: 576px) {
+		.vx-cta-actions {
+			flex-direction: column;
+			align-items: stretch;
+			max-width: 280px;
+			margin: 0 auto;
+		}
+
+		.vx-cta-actions .vx-btn {
+			width: 100%;
+			min-width: 0;
+			min-height: 48px;
+			padding: 12px 18px;
+		}
+	}
+
 	.vx-feature-list {
 		display: grid;
 		gap: 16px;
@@ -968,8 +997,8 @@
 								<i class="ti-shield" style="font-size: 24px; color: #10b981;"></i>
 							</div>
 							<div class="vx-insight-content">
-								<h5>Funds <span style="color: #10b981;">Protection</span></h5>
-								<p>Your security is our priority. We provide industry-leading insurance protection for client funds up to <strong>$1,000,000</strong>, ensuring your investments are protected against unforeseen circumstances.</p>
+								<h5>Risk <span style="color: #10b981;">Information</span></h5>
+								<p>Review applicable fees, trading conditions, and risk information before using any trading feature. Financial markets can move quickly and losses are possible.</p>
 							</div>
 						</div>
 					</div>
@@ -1221,7 +1250,7 @@
 			<div class="text-center">
 				<div class="vx-badge">SOCIAL TRADING</div>
 				<h2 class="vx-title">Copy Professional Traders</h2>
-				<p class="vx-subtitle">Automatically replicate the trades of successful investors</p>
+				<p class="vx-subtitle">Compare public strategy information and make your own trading decisions</p>
 			</div>
 
 			<div class="vx-grid-4">
@@ -1350,9 +1379,9 @@
 	<section class="vx-section">
 		<div class="container">
 			<div class="text-center">
-				<div class="vx-badge">TRUSTED WORLDWIDE</div>
-				<h2 class="vx-title">Why velocityx-ai Is One of the World's Most Trusted Brands</h2>
-				<p class="vx-subtitle">Recognized for reliability, security, and innovation in financial markets</p>
+				<div class="vx-badge">MARKET INFORMATION</div>
+				<h2 class="vx-title">Market Information for More Informed Decisions</h2>
+				<p class="vx-subtitle">Review market data, platform conditions, and risk information in one place</p>
 			</div>
 
 			<div class="vx-market-grid">
@@ -1502,14 +1531,14 @@
 			<div class="text-center">
 				<div class="vx-badge">GET STARTED</div>
 				<h2 class="vx-title">Start Trading with velocityx-ai</h2>
-				<p class="vx-subtitle">Join thousands of traders who trust velocityx-ai for their trading journey</p>
+				<p class="vx-subtitle">Explore the platform and review the available trading tools</p>
 			</div>
 
 			<div style="text-align: center; margin-top: 48px;">
 				<p style="font-size: 18px; color: #cbd5e1; line-height: 1.8; max-width: 700px; margin: 0 auto 32px;">Experience the difference of trading with a platform built for your success. Access professional tools, competitive pricing, and dedicated support all in one place.</p>
-				<div>
-					<a href="/signup" class="vx-btn" style="padding: 16px 40px; font-size: 16px;">Create Free Account</a>
-					<a href="#" class="vx-btn vx-btn-outline" style="padding: 16px 40px; font-size: 16px; margin-left: 16px;">Try Demo Account</a>
+				<div class="vx-cta-actions">
+					<a href="/signup" class="vx-btn">Create Free Account</a>
+					<a href="/signup" class="vx-btn vx-btn-outline">Try Demo Account</a>
 				</div>
 				<p style="margin-top: 24px; font-size: 13px; color: #94a3b8;">No credit card required • Free demo account • Start with just $100</p>
 			</div>
@@ -2068,32 +2097,3 @@
 		const miniCanvas = document.getElementById('miniChart');
 		if (miniCanvas) {
 			const ctx = miniCanvas.getContext('2d');
-
-			ctx.strokeStyle = '#1a2332';
-			ctx.lineWidth = 1;
-			for (let i = 0; i < 6; i++) {
-				const y = (miniCanvas.height / 6) * i;
-				ctx.beginPath();
-				ctx.moveTo(0, y);
-				ctx.lineTo(miniCanvas.width, y);
-				ctx.stroke();
-			}
-
-			ctx.beginPath();
-			ctx.strokeStyle = '#3b82f6';
-			ctx.lineWidth = 2;
-			for (let i = 0; i < miniCanvas.width; i += 10) {
-				const x = i;
-				const y = miniCanvas.height / 2 + Math.sin(i / 30) * 50 + (Math.random() - 0.5) * 20;
-				if (i === 0) {
-					ctx.moveTo(x, y);
-				} else {
-					ctx.lineTo(x, y);
-				}
-			}
-			ctx.stroke();
-		}
-	}
-	</script>
-</body>
-</html>
