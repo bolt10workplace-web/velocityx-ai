@@ -20,8 +20,6 @@ const configuredImageUrl = process.env.EMAIL_IMAGE_URL || '';
 const imageUrl = configuredImageUrl && !configuredImageUrl.includes('b8aqlNz') ? configuredImageUrl : defaultImageUrl;
 let mailFrom = getEnv('MAIL_FROM') || mailUser || 'Veloxicity <no-reply@veloxicity.com>';
 mailFrom = mailFrom.replace(/[\r\n]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^"(.+)"$/, '$1');
-const resendApiKey = getEnv('RESEND_API_KEY');
-const resendFrom = getEnv('RESEND_FROM') || mailFrom;
 
 const useNamedMailService = Boolean(mailService && !mailHost);
 const transporterOptions = useNamedMailService
@@ -30,7 +28,6 @@ const transporterOptions = useNamedMailService
 
 const transporter = nodemailer.createTransport(transporterOptions);
 const mailConfigured = Boolean(mailUser && mailPass);
-const resendConfigured = Boolean(resendApiKey && resendFrom);
 const mailUserLabel = mailUser ? `${mailUser.slice(0, 2)}***${mailUser.slice(-Math.min(12, mailUser.length - 2))}` : 'missing';
 const dataDir = path.join(__dirname, 'data');
 const failedEmailsPath = path.join(dataDir, 'failed_emails.json');
@@ -61,9 +58,7 @@ const enqueueFailedEmail = (to, subject, html, error) => {
   }
 };
 
-if (resendConfigured) {
-  console.info('Mailer: Resend API configured', { from: resendFrom });
-} else if (mailConfigured) {
+if (mailConfigured) {
   console.info('Mailer configuration:', {
     mode: useNamedMailService ? 'service' : 'smtp',
     service: useNamedMailService ? mailService : undefined,
@@ -77,27 +72,9 @@ if (resendConfigured) {
     .then(() => console.info('Mailer: transporter verified and ready'))
     .catch((error) => console.error('Mailer verify failed:', error.message));
 } else {
-  console.warn('Mailer disabled: set RESEND_API_KEY and RESEND_FROM, or MAIL_USER and MAIL_PASS in the deployment environment.');
+  console.warn('Mailer disabled: set MAIL_USER and MAIL_PASS in the deployment environment.');
 }
 const sendMail = async (to, subject, html) => {
-  if (resendConfigured) {
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: resendFrom, to: [to], subject, html, text: textFromHtml(html) })
-      });
-      if (!response.ok) {
-        const details = await response.text();
-        throw new Error(`Resend ${response.status}: ${details.slice(0, 300)}`);
-      }
-      return true;
-    } catch (error) {
-      console.error(`Mailer failed for ${to}:`, error.message);
-      enqueueFailedEmail(to, subject, html, error);
-      return false;
-    }
-  }
   if (!mailConfigured) {
     return false;
   }
@@ -110,3 +87,26 @@ const sendMail = async (to, subject, html) => {
           await new Promise((resolve) => setTimeout(resolve, attempt * 750));
         }
       }
+    } catch (error) {
+      console.error(`Mailer failed for ${to}:`, error.message);
+      enqueueFailedEmail(to, subject, html, error);
+      return false;
+    }
+  return false;
+};
+
+const sendTemplated = (to, subject, title, body, preview) => sendMail(to, subject, layout(title, body, preview));
+const money = (amount) => `$${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const greeting = (name) => `<p style="font-size:18px">Hi ${escapeHtml(name || 'there')},</p>`;
+const button = (url, label) => `<p style="margin:28px 0"><a href="${escapeHtml(url)}" style="background:#1769e0;color:#fff;padding:13px 22px;border-radius:6px;text-decoration:none;font-weight:bold">${escapeHtml(label)}</a></p>`;
+
+const sendWelcomeEmail = (email, fullName) => sendTemplated(email, 'Welcome to Veloxicity', 'Welcome to Veloxicity', `${greeting(fullName)}<p>Your account has been created successfully. You can now sign in and manage your account.</p>${button(`${appUrl}/login`, 'Sign in to your account')}<p>Keep your password private and contact support if you did not create this account.</p>`, 'Your Veloxicity account is ready.');
+const sendLoginEmail = (email, fullName) => sendTemplated(email, 'New sign-in to your Veloxicity account', 'New sign-in', `${greeting(fullName)}<p>Your Veloxicity account was just used to sign in.</p><p>If this was not you, reset your password and contact support immediately.</p>`, 'A new sign-in was detected on your account.');
+const sendCopyTradeEmail = (email, fullName, expertName, amount) => sendTemplated(email, 'Your copy trade has started', 'Copy trade started', `${greeting(fullName)}<p>Your copy trade is now active.</p><p><strong>Expert:</strong> ${escapeHtml(expertName)}<br><strong>Amount:</strong> ${money(amount)}</p>${button(`${appUrl}/user/dashboard`, 'View your dashboard')}`, 'Your copy trade is now active.');
+const sendInvestmentEmail = (email, fullName, planName, amount) => sendTemplated(email, 'Your investment has started', 'Investment started', `${greeting(fullName)}<p>Your investment is now active.</p><p><strong>Plan:</strong> ${escapeHtml(planName)}<br><strong>Amount:</strong> ${money(amount)}</p>${button(`${appUrl}/user/dashboard`, 'View your dashboard')}`, 'Your investment is now active.');
+const sendTradeEmail = (email, fullName, amount, signal) => sendTemplated(email, 'Trade confirmed', 'Trade confirmed', `${greeting(fullName)}<p>Your trade was processed successfully.</p><p><strong>Amount:</strong> ${money(amount)}${signal ? `<br><strong>Signal:</strong> ${escapeHtml(signal)}` : ''}</p>${button(`${appUrl}/user/dashboard`, 'View your dashboard')}`, 'Your trade was processed successfully.');
+const sendDepositEmail = (email, fullName, amount, currency) => sendTemplated(email, 'Deposit request received', 'Deposit received', `${greeting(fullName)}<p>Your deposit request has been received and is awaiting review.</p><p><strong>Amount:</strong> ${money(amount)}<br><strong>Currency:</strong> ${escapeHtml(currency)}</p>`, 'Your deposit request is awaiting review.');
+const sendWithdrawalEmail = (email, fullName, amount, method) => sendTemplated(email, 'Withdrawal request received', 'Withdrawal received', `${greeting(fullName)}<p>Your withdrawal request has been received and is awaiting review.</p><p><strong>Amount:</strong> ${money(amount)}<br><strong>Method:</strong> ${escapeHtml(method || 'Selected method')}</p>`, 'Your withdrawal request is awaiting review.');
+const sendPasswordResetEmail = (email, fullName, token) => sendTemplated(email, 'Reset your Veloxicity password', 'Reset your password', `${greeting(fullName)}<p>We received a request to reset your password. This link expires in one hour.</p>${button(`${appUrl}/reset-password/${encodeURIComponent(token)}`, 'Reset password')}<p>If you did not request this, you can safely ignore this email.</p>`, 'Your password reset link is ready.');
+
+module.exports = { sendWelcomeEmail, sendLoginEmail, sendCopyTradeEmail, sendInvestmentEmail, sendTradeEmail, sendDepositEmail, sendWithdrawalEmail, sendPasswordResetEmail };
